@@ -1,18 +1,37 @@
-import { createClient } from "redis";
+import asyncio
+import json
+import redis.asyncio as redis
+from fastapi import FastAPI, WebSocket
+from fastapi.responses import HTMLResponse
 
-const client = createClient();
+app = FastAPI()
 
-async function main() {
-  await client.connect();
-  console.log("Conectado a Redis - esperando datos...");
+CHANNEL = "weather_channel"
 
-  await client.subscribe("weather_channel", (message) => {
-    const data = JSON.parse(message);
-    console.log("Recibido:", data);
+@app.on_event("startup")
+async def startup_event():
+    app.state.redis = redis.Redis(host="localhost", port=6379, db=0)
+    app.state.pubsub = app.state.redis.pubsub()
+    await app.state.pubsub.subscribe(CHANNEL)
+    print(f"Suscrito al canal: {CHANNEL}")
 
-    // Aquí podrías enviar los datos a la web con websockets
-    // o guardarlos en un archivo temporal
-  });
-}
+@app.on_event("shutdown")
+async def shutdown_event():
+    await app.state.pubsub.unsubscribe(CHANNEL)
+    await app.state.redis.close()
 
-main().catch(console.error);
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    print("Cliente conectado al WebSocket")
+
+    try:
+        async for message in app.state.pubsub.listen():
+            if message["type"] == "message":
+                data = json.loads(message["data"])
+                await websocket.send_json(data)
+    except Exception as e:
+        print("❌ Error:", e)
+    finally:
+        await websocket.close()
+        print("Cliente desconectado")

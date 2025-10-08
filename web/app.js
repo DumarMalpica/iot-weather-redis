@@ -1,31 +1,27 @@
-const ctx = document.getElementById("tempChart").getContext("2d");
+const log = document.getElementById("log");
 
-const tempChart = new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: [],
-    datasets: [{
-      label: "Temperatura (°C)",
-      data: [],
-      borderColor: "rgba(75, 192, 192, 1)",
-      borderWidth: 2
-    }]
-  },
-  options: {
-    responsive: true,
-    scales: {
-      x: { title: { display: true, text: "Tiempo" } },
-      y: { title: { display: true, text: "Temperatura (°C)" } }
-    }
-  }
-});
+// Conecta al WebSocket
+const ws = new WebSocket("ws://localhost:8000/ws");
 
-// Simulación: aquí en el futuro conectarías WebSocket/Fetch al subscriber
-setInterval(() => {
-  const fakeTemp = (20 + Math.random() * 10).toFixed(1);
-  const now = new Date().toLocaleTimeString();
+ws.onopen = () => {
+  log.textContent = "✅ Conectado al WebSocket...\n";
+};
 
-  tempChart.data.labels.push(now);
-  tempChart.data.datasets[0].data.push(fakeTemp);
-  tempChart.update();
-}, 2000);
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  const timestamp = new Date().toLocaleTimeString();
+
+  // Añade el JSON recibido con formato
+  log.textContent += `[${timestamp}] ${JSON.stringify(data, null, 2)}\n\n`;
+
+  // Mantiene el scroll abajo
+  log.scrollTop = log.scrollHeight;
+};
+
+ws.onerror = (e) => {
+  log.textContent += `❌ Error WebSocket: ${e.message}\n`;
+};
+
+ws.onclose = () => {
+  log.textContent += "🔴 Conexión cerrada\n";
+};

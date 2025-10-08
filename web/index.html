@@ -2,12 +2,30 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>IoT Weather Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>IoT Weather Log</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #0f0;
+      padding: 1rem;
+    }
+    h1 {
+      color: #0ff;
+    }
+    pre {
+      background: #000;
+      padding: 1rem;
+      border-radius: 8px;
+      height: 500px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
-  <h1>🌦️ IoT Weather Dashboard</h1>
-  <canvas id="tempChart" width="400" height="200"></canvas>
+  <h1>🌦️ IoT Weather Data Stream</h1>
+  <pre id="log">Esperando datos...</pre>
 
   <script src="app.js"></script>
 </body>
