@@ -134,7 +134,6 @@ Esto levanta un servidor **FastAPI** en `http://127.0.0.1:8000` que escucha los 
 3. **Subscriber** → escucha Redis y reenvía por WebSocket.
 4. **Frontend (Live Server)** → recibe los datos y los muestra en tiempo real.
 
-📸 **Captura 5:** *Diagrama o esquema del flujo general del sistema.*
 
 ---
 
